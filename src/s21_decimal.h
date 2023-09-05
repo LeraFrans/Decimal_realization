@@ -58,6 +58,17 @@ int s21_owerflow_before_normalization_for_add(s21_decimal value_1, s21_decimal v
 int s21_check_exponenta(s21_decimal value_1, s21_decimal value_2);
 int s21_banking_round_for_add (int remainder_1[], int remainder_2[], s21_decimal *result);
 int s21_banking_round_for_sub (int remainder_1[], int remainder_2[], s21_decimal *result);
+int is_zero_array_for_big_decimal (int array[]);
+
+
+//for big decimal
+void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_deceimal value_2);
+void s21_print_big_decimal(s21_big_decimal value);
+void s21_sum_of_ten_array_for_big_decimal (int value_1[], int value_2[]);
+int s21_set_bit_V2_for_big_decimal(s21_big_decimal *result, int position, int value);
+void s21_from_ten_array_to_big_decimal(int array[], s21_big_decimal *result);
+int s21_div_two_ten_array_for_big_decimal (int value[]);
+int s21_get_bit_for_big_decimal(s21_big_decimal value, int position);
 
 
 //arithmetic
