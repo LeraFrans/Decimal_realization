@@ -62,7 +62,7 @@ int is_zero_array_for_big_decimal (int array[]);
 
 
 //for big decimal
-void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_deceimal value_2);
+void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_decimal value_2);
 void s21_print_big_decimal(s21_big_decimal value);
 void s21_sum_of_ten_array_for_big_decimal (int value_1[], int value_2[]);
 int s21_set_bit_V2_for_big_decimal(s21_big_decimal *result, int position, int value);

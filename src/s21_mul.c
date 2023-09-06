@@ -1,4 +1,4 @@
-#include "s21_decimal.c"
+#include "s21_decimal.h"
 
 // Умножение двух децималов
 //Функции возвращают код ошибки:
@@ -17,15 +17,26 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
     for (int i = 0; i < 96; i++) {
         if (s21_get_bit(value_2, i) == 1) {
-            big_value_1 << i;
-            s21_sum_mantisa_for_big_decimal(&big_result, big_value_1);
+            //вот тут чтобы адекватно прыгало в следующий бит нужно сделать
+            //big_value_1 << i;
+            s21_big_decimal cpy_big_value_1 = {0};
+            for (int j = 223; j >= i; j--) {
+                s21_set_bit_V2_for_big_decimal(&cpy_big_value_1, j, s21_get_bit_for_big_decimal(big_value_1, j - i));
+            }
+            //for (int k = 0; 0 < i; k++) s21_set_bit_V2_for_big_decimal(&big_result, k, 0);
+
+
+            s21_sum_mantisa_for_big_decimal(&big_result, cpy_big_value_1);
         }
     }
 
     int big_ten_array[90] = {0};
     s21_from_big_decimal_to_ten_array(big_result, big_ten_array);
 
-    int res_exp = s21_get_exp(value_1) + s21_get_exp(value_2);
+    int exp_1 = s21_get_exp(value_1);
+    int exp_2 = s21_get_exp(value_2);
+    int res_exp = abs(exp_1 + exp_2);
+    int sign = exp_1 + exp_2 >= 0 ? 0 : 1;
     if (res_exp > 28) {
         int diff = res_exp - 28;
         int remainder = 0;
@@ -33,34 +44,48 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
             res_exp --;
             remainder = big_ten_array[0];
             for (int j = 0; j < 89; j++) big_ten_array[i] = big_ten_array[i+1];
-            array_2[89] = 0;
+            big_ten_array[89] = 0;
         }
     }
 
+    int flag_owerflow_mantisa = 0;
     //нужно проверить, вмещается ли целая часть в мантиссу (сравнить с максимальным беззнаковым инт децимала в рамках десятичного массива),
     // остальное (цифры после запятой) при переводе в обычный децимал можно отбросить, применив банковское округление
-
+    int max_ten_array[] = {5, 3, 3, 0, 5, 9, 3, 4, 5, 3, 9, 5, 7, 3, 3, 4, 6, 2, 4, 1, 5, 2, 6, 1, 8, 2, 2, 9, 7, 0};
+    int mantisa_ten_array[30] = {0};
+    int counter = 0;
+    for (int i = res_exp; i < 90; i++) {
+        mantisa_ten_array[counter] = big_ten_array[i];
+        if (counter > 29 && big_ten_array[i] != 0) {
+            flag_owerflow_mantisa = 1;
+            break;
+        }
+    } 
+    if (s21_compare_ten_array(mantisa_ten_array, max_ten_array) == 1) flag_owerflow_mantisa = 1;
+    
     
 
     return res;
 }
 
 //результат хранится в value_1;
-void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_deceimal value_2) {
+void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_decimal value_2) {
     int next = 0;
     int sign_next = 0;
     int bit_1 = 0, bit_2 = 0;
 
+    s21_decimal result = {0};
+
     for (int i = 0; i < 224; i++) {
-        bit_1 = s21_get_bit_for_big_decimal(value_1, i);
+        bit_1 = s21_get_bit_for_big_decimal(*value_1, i);
         bit_2 = s21_get_bit_for_big_decimal(value_2, i);
         next += bit_1 + bit_2;
-        result->bits[i / 32] |= ((next % 2) << (i % 32));
+        result.bits[i / 32] |= ((next % 2) << (i % 32));
         if(next == 1) next = 0;
         if(next > 1) next = 1;
-
-        
     }
+
+    for (int i = 0; i < 8; i++) value_1->bits[i] = result.bits[i];
 
     return OK;
 }
@@ -116,18 +141,13 @@ void s21_from_ten_array_to_big_decimal(int array[], s21_big_decimal *result) {
     int i = 0;
 //int max_array[] = {5, 3, 3, 0, 5, 9, 3, 4, 5, 3, 9, 5, 7, 3, 3, 4, 6, 2, 4, 1, 5, 2, 6, 1, 8, 2, 2, 9, 7, 0};
     while (is_zero_array_for_big_decimal(array) != 1 ) {
-        //printf("\n\nFINISH1\n\n");
-        //print_ten_array(array);
         s21_set_bit_V2_for_big_decimal(&copy_result, i, s21_div_two_ten_array_for_big_decimal(array));
-        //for (int i = 0; i < 30; i++) printf("%d", array[i]);
-        //printf("\n");
         i++;
     }
     
     for (int i = 0; i < 96; i++) {
         s21_set_bit_V2_for_big_decimal(result, i, s21_get_bit_for_big_decomal(copy_result, i));
     }
-    //printf("\n\nJJJJJJJJJJJJJJJ\n\n");
 }
 
 int s21_div_two_ten_array_for_big_decimal (int value[]) {
@@ -139,15 +159,12 @@ int s21_div_two_ten_array_for_big_decimal (int value[]) {
         else {
             flag_start = 1;
             quotient = value[i] + (remainder*10);
-            //printf("quotient %d = %d\n", i, quotient);
             res[i] = quotient/2;
-            //printf("res[%d] = %d\n", i, res[i]);
             remainder = quotient%2;
         }
     }
 
     for (int i = 0; i <= 89; i++) value[i] = res[i];
-    //free(res);
 
     return remainder;
 }
