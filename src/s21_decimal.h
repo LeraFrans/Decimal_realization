@@ -62,6 +62,9 @@ int is_zero_array_for_big_decimal (int array[]);
 
 
 //for big decimal
+void s21_print_big_decimal(s21_big_decimal value);
+void s21_print_big_ten_array(int value[]);
+void s21_from_big_decimal_to_ten_array(s21_big_decimal value, int result[]);
 void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_decimal value_2);
 void s21_print_big_decimal(s21_big_decimal value);
 void s21_sum_of_ten_array_for_big_decimal (int value_1[], int value_2[]);
@@ -86,6 +89,9 @@ int s21_div_by_ten(s21_decimal value, s21_decimal *result);
 int s21_mul_ten_mantissa(s21_decimal value, s21_decimal *result);
 int s21_increase_exp(s21_decimal value, s21_decimal* result);
 int s21_decrease_exp(s21_decimal value, s21_decimal* result);
+int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
+
+
 //convertors
 int s21_from_int_to_decimal(int src, s21_decimal *dst);
 int s21_from_decimal_to_int(s21_decimal src, int *dst);

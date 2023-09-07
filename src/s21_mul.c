@@ -11,7 +11,13 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     s21_big_decimal big_value_1 = {0};
     s21_big_decimal big_value_2 = {0};
     s21_cpy_decimal_to_big_decimal(value_1, &big_value_1);
-    s21_cpy_decimal_to_big_decomal(value_2, &big_value_2);
+    //s21_cpy_decimal_to_big_decimal(value_2, &big_value_2);
+
+printf("Big_value_1 in start\n");
+s21_print_big_decimal(big_value_1);
+printf("value_2 in start\n %d\n", value_2.bits[0]);
+//s21_print_decimal(value_2);
+//s21_print_big_decimal(big_value_2);
 
     s21_big_decimal big_result = {0}; 
 
@@ -25,13 +31,23 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
             }
             //for (int k = 0; 0 < i; k++) s21_set_bit_V2_for_big_decimal(&big_result, k, 0);
 
+printf("CPY VALUE 1. SHIFT I = %d\n", i);
+s21_print_big_decimal(cpy_big_value_1);
 
             s21_sum_mantisa_for_big_decimal(&big_result, cpy_big_value_1);
         }
     }
+printf("BIG DECIMAL RESULT AFTER SUMM\n");
+s21_print_big_decimal(big_result);
+printf("\nRESULT = %d\n", big_result.bits[0]);
 
+
+//Вот эта хуита не отрабытывает
     int big_ten_array[90] = {0};
     s21_from_big_decimal_to_ten_array(big_result, big_ten_array);
+
+printf("Create big_ten_array\n");
+s21_print_big_ten_array(big_ten_array);
 
     int exp_1 = s21_get_exp(value_1);
     int exp_2 = s21_get_exp(value_2);
@@ -62,7 +78,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         }
     } 
     if (s21_compare_ten_array(mantisa_ten_array, max_ten_array) == 1) flag_owerflow_mantisa = 1;
-    
+s21_print_big_ten_array(mantisa_ten_array);
     
 
     return res;
@@ -86,12 +102,20 @@ void s21_sum_mantisa_for_big_decimal (s21_big_decimal *value_1, s21_big_decimal 
     }
 
     for (int i = 0; i < 8; i++) value_1->bits[i] = result.bits[i];
-
-    return OK;
 }
 
 void s21_print_big_decimal(s21_big_decimal value) {
-    ;
+    for (int i = 0; i < 256; i++) {
+        if (i % 32 == 0) printf("\n");
+        printf("%d ", s21_get_bit_for_big_decimal(value, i));
+    }
+    printf("\n");
+}
+
+void s21_print_big_ten_array(int value[]) {
+    printf("Big ten array:\n");
+    for (int i = 0; i < 90; i++) printf("%d ", value[0]);
+    printf("\n");
 }
 
 void s21_from_big_decimal_to_ten_array(s21_big_decimal value, int result[]) {
@@ -137,7 +161,7 @@ int s21_set_bit_V2_for_big_decimal(s21_big_decimal *result, int position, int va
 }
 
 void s21_from_ten_array_to_big_decimal(int array[], s21_big_decimal *result) {
-    s21_decimal copy_result = {0};
+    s21_big_decimal copy_result = {0};
     int i = 0;
 //int max_array[] = {5, 3, 3, 0, 5, 9, 3, 4, 5, 3, 9, 5, 7, 3, 3, 4, 6, 2, 4, 1, 5, 2, 6, 1, 8, 2, 2, 9, 7, 0};
     while (is_zero_array_for_big_decimal(array) != 1 ) {
@@ -146,7 +170,7 @@ void s21_from_ten_array_to_big_decimal(int array[], s21_big_decimal *result) {
     }
     
     for (int i = 0; i < 96; i++) {
-        s21_set_bit_V2_for_big_decimal(result, i, s21_get_bit_for_big_decomal(copy_result, i));
+        s21_set_bit_V2_for_big_decimal(result, i, s21_get_bit_for_big_decimal(copy_result, i));
     }
 }
 
