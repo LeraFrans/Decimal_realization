@@ -37,20 +37,12 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
 //     ЕБУЧАЯ МАГИЯ НАЧАЛАСЬ)
 
-s21_print_big_decimal(cpy_big_value_1);
+//s21_print_big_decimal(cpy_big_value_1);
 
             s21_sum_mantisa_for_big_decimal(&big_result, cpy_big_value_1);
 //printf("%d after summ big_result.bits[4] = %d\n", i, big_result.bits[4]);
         }
     }
-//printf("BIG DECIMAL RESULT AFTER SUMM\n");
-//s21_print_big_decimal(big_result);
-
-//printf("1 big_result.bits[4] = %d\n", big_result.bits[4]);
-
-//printf("\nRESULT = %d\n", big_result.bits[0]);
-
-
 //Вот эта хуита не отрабaтывает (уже вроде как работает))
     int big_ten_array[90] = {0};
     s21_from_big_decimal_to_ten_array(big_result, big_ten_array);
@@ -80,6 +72,10 @@ s21_print_big_ten_array(big_ten_array);
         }
     }
 
+printf("After shift\n");
+s21_print_big_ten_array(big_ten_array);
+
+
     int flag_owerflow_mantisa = 0;
     //нужно проверить, вмещается ли целая часть в мантиссу (сравнить с максимальным беззнаковым инт децимала в рамках десятичного массива),
     // остальное (цифры после запятой) при переводе в обычный децимал можно отбросить, применив банковское округление
@@ -88,10 +84,11 @@ s21_print_big_ten_array(big_ten_array);
     int counter = 0;
     for (int i = res_exp; i < 90; i++) {
         mantisa_ten_array[counter] = big_ten_array[i];
-        if (counter > 29 && big_ten_array[i] != 0) {
+        if (counter >= 28 && big_ten_array[i] != 0) {
             flag_owerflow_mantisa = 1;
             break;
         }
+        counter++;
     } 
     if (s21_compare_ten_array(mantisa_ten_array, max_ten_array) == 1) flag_owerflow_mantisa = 1;
 
