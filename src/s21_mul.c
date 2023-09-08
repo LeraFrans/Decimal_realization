@@ -13,41 +13,57 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     s21_cpy_decimal_to_big_decimal(value_1, &big_value_1);
     //s21_cpy_decimal_to_big_decimal(value_2, &big_value_2);
 
-printf("Big_value_1 in start\n");
-s21_print_big_decimal(big_value_1);
-printf("value_2 in start\n %d\n", value_2.bits[0]);
+//printf("Big_value_1 in start\n");
+//s21_print_big_decimal(big_value_1);
+//printf("HERE value_2 in start = %d\n", value_2.bits[0]);
 //s21_print_decimal(value_2);
 //s21_print_big_decimal(big_value_2);
 
     s21_big_decimal big_result = {0}; 
-
+//printf("start cpy_big_value_1.bits[4] = %d\n", cpy_big_value.bits[4]);
     for (int i = 0; i < 96; i++) {
         if (s21_get_bit(value_2, i) == 1) {
             //вот тут чтобы адекватно прыгало в следующий бит нужно сделать
             //big_value_1 << i;
             s21_big_decimal cpy_big_value_1 = {0};
+//printf("FFFF after cpy value_1 to big = %d\n", cpy_big_value_1.bits[4]);
             for (int j = 223; j >= i; j--) {
                 s21_set_bit_V2_for_big_decimal(&cpy_big_value_1, j, s21_get_bit_for_big_decimal(big_value_1, j - i));
             }
             //for (int k = 0; 0 < i; k++) s21_set_bit_V2_for_big_decimal(&big_result, k, 0);
+//printf("GGGG after shift and before summ = %d\n", cpy_big_value_1.bits[4]);
+//printf("CPY VALUE 1. SHIFT I = %d\n", i);
 
-printf("CPY VALUE 1. SHIFT I = %d\n", i);
+
+//     ЕБУЧАЯ МАГИЯ НАЧАЛАСЬ)
+
 s21_print_big_decimal(cpy_big_value_1);
 
             s21_sum_mantisa_for_big_decimal(&big_result, cpy_big_value_1);
+//printf("%d after summ big_result.bits[4] = %d\n", i, big_result.bits[4]);
         }
     }
-printf("BIG DECIMAL RESULT AFTER SUMM\n");
-s21_print_big_decimal(big_result);
-printf("\nRESULT = %d\n", big_result.bits[0]);
+//printf("BIG DECIMAL RESULT AFTER SUMM\n");
+//s21_print_big_decimal(big_result);
+
+//printf("1 big_result.bits[4] = %d\n", big_result.bits[4]);
+
+//printf("\nRESULT = %d\n", big_result.bits[0]);
 
 
-//Вот эта хуита не отрабытывает
+//Вот эта хуита не отрабaтывает (уже вроде как работает))
     int big_ten_array[90] = {0};
     s21_from_big_decimal_to_ten_array(big_result, big_ten_array);
 
+
 printf("Create big_ten_array\n");
 s21_print_big_ten_array(big_ten_array);
+
+
+
+//printf("WORKING");
+// До этого момента работает
+
 
     int exp_1 = s21_get_exp(value_1);
     int exp_2 = s21_get_exp(value_2);
@@ -68,7 +84,7 @@ s21_print_big_ten_array(big_ten_array);
     //нужно проверить, вмещается ли целая часть в мантиссу (сравнить с максимальным беззнаковым инт децимала в рамках десятичного массива),
     // остальное (цифры после запятой) при переводе в обычный децимал можно отбросить, применив банковское округление
     int max_ten_array[] = {5, 3, 3, 0, 5, 9, 3, 4, 5, 3, 9, 5, 7, 3, 3, 4, 6, 2, 4, 1, 5, 2, 6, 1, 8, 2, 2, 9, 7, 0};
-    int mantisa_ten_array[30] = {0};
+    int mantisa_ten_array[90] = {0};
     int counter = 0;
     for (int i = res_exp; i < 90; i++) {
         mantisa_ten_array[counter] = big_ten_array[i];
@@ -78,7 +94,9 @@ s21_print_big_ten_array(big_ten_array);
         }
     } 
     if (s21_compare_ten_array(mantisa_ten_array, max_ten_array) == 1) flag_owerflow_mantisa = 1;
-s21_print_big_ten_array(mantisa_ten_array);
+
+//printf("FINAL MANTISA\n");
+//s21_print_big_ten_array(mantisa_ten_array);
     
 
     return res;
@@ -114,7 +132,7 @@ void s21_print_big_decimal(s21_big_decimal value) {
 
 void s21_print_big_ten_array(int value[]) {
     printf("Big ten array:\n");
-    for (int i = 0; i < 90; i++) printf("%d ", value[0]);
+    for (int i = 0; i < 90; i++) printf("%d ", value[i]);
     printf("\n");
 }
 
@@ -122,16 +140,24 @@ void s21_from_big_decimal_to_ten_array(s21_big_decimal value, int result[]) {
     int add[90] = {0};
     add[0] = 1;
     for (int i = 0; i<224; i++) {
-        if (s21_get_bit_for_big_decimal(value, i)) s21_sum_of_ten_array_for_big_decimal (result, add);
+        if (s21_get_bit_for_big_decimal(value, i)) {
+            s21_sum_of_ten_array_for_big_decimal (result, add);
+            //printf("SUM in I = %d is:\n", i);
+            //s21_print_big_ten_array(result);
+        }
         s21_sum_of_ten_array_for_big_decimal (add, add);
     }
 }
 
 void s21_sum_of_ten_array_for_big_decimal (int value_1[], int value_2[]) {
     int remainder = 0;
+
+    //s21_print_big_ten_array(value_1);
+    //printf("HHHHHHHHHHH%dHHHHHHHHHHH\n", value_1[50]);
     for (int i = 0; i < 90; i++) {
         int res = value_1[i] + value_2[i] + remainder;
         value_1[i] = res%10;
+        //printf("value_1[%d] = %d\n", i, value_1);
         remainder = res/10;
     }
     //Тут нужно проверить на переполнение и вернуть ошибку если что

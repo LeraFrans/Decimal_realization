@@ -13,6 +13,18 @@ int main() {
 
   int mul = s21_mul(a, b, &result);
 
+  // int a[90] = {0};
+  // a[0] = 9;
+  // a[1] = 1;
+  // int b[90] = {0};
+  // b[0] = 0;
+  // b[1] = 9;
+  // b[2] = 1;
+
+  // s21_sum_of_ten_array_for_big_decimal(a, b);
+
+  // s21_print_big_ten_array(a);
+
   
 
   // printf("First decimal\n");
