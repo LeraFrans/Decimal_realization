@@ -903,6 +903,7 @@ START_TEST(s21_test_decimal_add_16) {
   int add = s21_add(c, d, p_res);
   ck_assert_int_eq(add, 0);
 
+
   int equal =
       s21_is_equal(res, etalon);
   ck_assert_int_eq(equal, S21_TRUE);
