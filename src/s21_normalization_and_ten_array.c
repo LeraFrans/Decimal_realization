@@ -8,6 +8,17 @@ void print_ten_array(int array[]) {
     printf(" ]\n");
 }
 
+//Превращает мантису децимала в массив десятичных цифр, например число 654,21 превратится в {1, 2, 4, 5, 6, 0 ... 0}
+// для вызова необходимо создать массив интов размером в 30 цифр
+void s21_from_decimal_to_ten_array(s21_decimal value, int result[]) {
+    int add[30] = {0};
+    add[0] = 1;
+    for (int i = 0; i<96; i++) {
+        if (s21_get_bit(value, i)) s21_sum_of_ten_array (result, add);
+        s21_sum_of_ten_array (add, add);
+    }
+}
+
 // Сравнивает десятичные массивы. Возвращает: 1 если первое больше, -1 если первое меньше, 0 если равны
 int s21_eq_ten_array (int value_1[], int value_2[]) {
     int res = 0;
@@ -27,22 +38,17 @@ int s21_eq_ten_array (int value_1[], int value_2[]) {
 
 // Cкладывает два десятичных массива, результат сохраняется в value_1
 void s21_sum_of_ten_array (int value_1[], int value_2[]) {
-    int remainder = 0;
+    int remainder = 0;                //цифра, оставшаяся после сложения предыдущих (младших) разрядов
     for (int i = 0; i<30; i++) {
         int res = value_1[i] + value_2[i] + remainder;
         value_1[i] = res%10;
         remainder = res/10;
     }
-    //Тут нужно проверить на переполнение и вернуть ошибку если что
 }
 
 //Вычитает десятичные массивы (из value_1 вычитается value_2), результат сохраняется в value_1
-
-//   Нужно проверить, какое число больше, а какое меньше и добавить эту обработку
-// Для этого нужно написать функцию сравнения (либо сравнивать десятичне массивы, либо децималы)
-// Плюс добавить обработку минусовых значений (подумать как передавать минусовые значения и нужно ли вообще это здесь)
+//По умолчанию первое по модулю больше, это нужно учитывать при вызове функции
 int s21_sub_of_ten_array (int value_1[], int value_2[]) {
-    //Тут нужно проверить, какое из чисел больше
     int error = 0;
     for (int i = 0; i < 30; i++) {
         if (value_1[i] < value_2[i]) {
@@ -55,55 +61,23 @@ int s21_sub_of_ten_array (int value_1[], int value_2[]) {
     return error;
 }
 
-/*
-int s21_get_bit(s21_decimal value, int position) {  // -1 - ERROR, position 0-127
-    int res = -1;
-    if((position > -1 && position < 128)) {
-
-        int byte = position / 32;
-        int bit = position % 32;
-        //printf("byte: %d bit: %d ", byte, bit);
-        res = value.bits[byte] & (1 << bit);
-        if(res != 0) res = 1;
-    }
-    return res;
-}
-*/
-
-// для вызова необходимо создать массив интов и потом его очистить 
-// int *array = calloc(30, sizeof(int));
-// s21_decimal_to_ten_array(value, array);
-//   ...работаем с ним...
-// free(array);
-void s21_from_decimal_to_ten_array(s21_decimal value, int result[]) {
-    int add[30] = {0};
-    add[0] = 1;
-    for (int i = 0; i<96; i++) {
-        if (s21_get_bit(value, i)) s21_sum_of_ten_array (result, add);
-        s21_sum_of_ten_array (add, add);
-    }
-}
 
 //Делит десятичный массив на 2. Изменяет сам массив по указателю, возвращает остаток от деления (либо 1, либо 0)
 int s21_div_two_ten_array (int value[]) {
     int res[30] = {0};
-    int flag_start = 0;
+    int flag_start = 0;  //идём справа налево, включится, когда дойдём до первого числа (самого старшего разряда)
     int remainder = 0, quotient = 0;
     for (int i = 29; i >= 0; i--) {
         if (flag_start == 0 && value[i] == 0) continue;
         else {
             flag_start = 1;
             quotient = value[i] + (remainder*10);
-            //printf("quotient %d = %d\n", i, quotient);
             res[i] = quotient/2;
-            //printf("res[%d] = %d\n", i, res[i]);
             remainder = quotient%2;
         }
     }
 
     for (int i = 0; i <= 29; i++) value[i] = res[i];
-    //free(res);
-
     return remainder;
 }
 
@@ -117,7 +91,6 @@ int is_zero_array (int array[]) {
             break;
         }
     }
-    //if (res == 1) printf("\n\nSSSSSSSSSSSSSSSSSSS\n\n");
     return res;
 }
 
@@ -135,36 +108,24 @@ int s21_set_bit_V2(s21_decimal *result, int position, int value) { //0 - OK, 1 -
     return res;
 }
 
+//переводит массив интов (десятичных цифр) обратно в мантису децимала
+// НЕ производит проверки на переполнение мантиссы
 void s21_from_ten_array_to_decimal(int array[], s21_decimal *result) {
     s21_decimal copy_result = {0};
-    int i = 0;
 //int max_array[] = {5, 3, 3, 0, 5, 9, 3, 4, 5, 3, 9, 5, 7, 3, 3, 4, 6, 2, 4, 1, 5, 2, 6, 1, 8, 2, 2, 9, 7, 0};
+    int i = 0;
+    //делит десятичный массив на 2, пока он не разделится до конца и не станет равен 0. 
+    //остатки от деления на 2 записывает в соответствующие разряды мантиссы децимала
     while (is_zero_array(array) != 1 ) {
-        //printf("\n\nFINISH1\n\n");
-        //print_ten_array(array);
         s21_set_bit_V2(&copy_result, i, s21_div_two_ten_array(array));
-        //for (int i = 0; i < 30; i++) printf("%d", array[i]);
-        //printf("\n");
         i++;
     }
     
-    for (int i = 0; i < 96; i++) {
-        s21_set_bit_V2(result, i, s21_get_bit(copy_result, i));
-    }
-    //printf("\n\nJJJJJJJJJJJJJJJ\n\n");
+    //перенос копии в оргиналбный результат
+    for (int i = 0; i < 96; i++) s21_set_bit_V2(result, i, s21_get_bit(copy_result, i));
 }
 
-/*
-void s21_print_decimal(s21_decimal value) {
-    for (int i = 127; i >= 0; i--) {
-        if((i + 1) % 32 == 0) printf("|\n");
-        printf("%d ", s21_get_bit(value, i));
-    }
-    printf("\n");
-    
-}
-*/
-
+//возвращает экспоненту децимала в виде десятичного числа
 int s21_get_exp(s21_decimal value) {
     return (value.bits[3] << 1)>>17;
 }
@@ -184,13 +145,6 @@ int s21_compare_ten_array (int array_1[], int array_2[]) {
     }
     return res;
 }
-
-/*
-void s21_cpy_decimal(s21_decimal src, s21_decimal* dest) {
-    for (int i = 0; i < 4; i++)
-        dest->bits[i] = src.bits[i];
-}
-*/
 
 
 
