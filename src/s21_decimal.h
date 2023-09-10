@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include<limits.h>
 #include<math.h>
+#include<string.h>
 
 typedef struct
 {
@@ -62,6 +63,8 @@ int is_zero_array_for_big_decimal (int array[]);
 
 
 //for big decimal
+void s21_banking_round_for_mult(int big_ten_array[], int remainder);
+int s21_compare_big_ten_array (int array_1[], int array_2[]);
 void s21_print_big_decimal(s21_big_decimal value);
 void s21_print_big_ten_array(int value[]);
 void s21_from_big_decimal_to_ten_array(s21_big_decimal value, int result[]);
@@ -95,6 +98,9 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 //convertors
 int s21_from_int_to_decimal(int src, s21_decimal *dst);
 int s21_from_decimal_to_int(s21_decimal src, int *dst);
+int s21_from_float_to_decimal(float src, s21_decimal *dst);
+int s21_from_decimal_to_float(s21_decimal src, float *dst);
+
 
 int s21_truncate(s21_decimal value, s21_decimal *result);
 int s21_negate(s21_decimal value, s21_decimal *result); // 0 - OK, 1 - ERROR

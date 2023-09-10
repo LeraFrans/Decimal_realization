@@ -165,9 +165,9 @@ void s21_print_decimal(s21_decimal value) {
 }
 */
 
-int s21_get_exp(s21_decimal value) {
-    return (value.bits[3] << 1)>>17;
-}
+// int s21_get_exp(s21_decimal value) {
+//     return (value.bits[3] << 1)>>17;
+// }
 
 //Сравнивает два десятичных массива, если первое больше, то возвращае т 1, если второе больше - -1, если равны - 0
 int s21_compare_ten_array (int array_1[], int array_2[]) {

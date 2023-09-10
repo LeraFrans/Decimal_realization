@@ -8,6 +8,9 @@
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int res = 0;
 
+    int sign = 0;
+    if ( (s21_get_bit(value_1, 127) == 1 && s21_get_bit(value_2, 127) == 0) || (s21_get_bit(value_1, 127) == 0 && s21_get_bit(value_2, 127) == 1)) sign = 1;
+
     s21_big_decimal big_value_1 = {0};
     s21_big_decimal big_value_2 = {0};
     s21_cpy_decimal_to_big_decimal(value_1, &big_value_1);
@@ -48,8 +51,8 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     s21_from_big_decimal_to_ten_array(big_result, big_ten_array);
 
 
-printf("Create big_ten_array\n");
-s21_print_big_ten_array(big_ten_array);
+//printf("Create big_ten_array\n");
+//s21_print_big_ten_array(big_ten_array);
 
 
 
@@ -60,20 +63,20 @@ s21_print_big_ten_array(big_ten_array);
     int exp_1 = s21_get_exp(value_1);
     int exp_2 = s21_get_exp(value_2);
     int res_exp = abs(exp_1 + exp_2);
-    int sign = exp_1 + exp_2 >= 0 ? 0 : 1;
+    //int sign = exp_1 + exp_2 >= 0 ? 0 : 1;
+    int remainder = 0;
     if (res_exp > 28) {
         int diff = res_exp - 28;
-        int remainder = 0;
         for (int i = 0; i < diff; i++) {
             res_exp --;
             remainder = big_ten_array[0];
-            for (int j = 0; j < 89; j++) big_ten_array[i] = big_ten_array[i+1];
+            for (int j = 0; j < 89; j++) big_ten_array[j] = big_ten_array[j+1];
             big_ten_array[89] = 0;
         }
     }
 
-printf("After shift\n");
-s21_print_big_ten_array(big_ten_array);
+//printf("After shift\n");
+//s21_print_big_ten_array(big_ten_array);
 
 
     int flag_owerflow_mantisa = 0;
@@ -92,11 +95,44 @@ s21_print_big_ten_array(big_ten_array);
     } 
     if (s21_compare_ten_array(mantisa_ten_array, max_ten_array) == 1) flag_owerflow_mantisa = 1;
 
+
+    if (flag_owerflow_mantisa == 0) {
+        int max_big_ten_array[90] = {0};
+        for (int i = 0; i < 30; i++) max_big_ten_array[i] = max_ten_array[i];
+
+        //пока наш большой десятичный массив больше максимально возможного, отрезаем числа после запятой
+        //плюс запоминаем последнее усеченное число, чтобы потом применить банковское округление
+        while (s21_compare_big_ten_array(big_ten_array, max_big_ten_array) == 1) {
+            res_exp --;
+            remainder = big_ten_array[0];
+            for (int j = 0; j < 89; j++) big_ten_array[j] = big_ten_array[j+1];
+            big_ten_array[89] = 0;
+        }
+    }
+    else {
+        if (sign == 0) res = 1;
+        else res = 2;
+    }
+    s21_banking_round_for_mult(big_ten_array, remainder);
+
+    s21_big_decimal copy = {0};
+    s21_from_ten_array_to_big_decimal(big_ten_array, &copy);
+    
+    for (int i = 0; i < 3; i++) result->bits[i] = copy.bits[i];
+    s21_set_exp(*result, result, res_exp);
+    s21_set_bit_V2(result, 127, sign);
+
 //printf("FINAL MANTISA\n");
 //s21_print_big_ten_array(mantisa_ten_array);
-    
-
     return res;
+}
+
+//Производит банковское округление, в зависимости от остатка (следующего числа, не вошедшего в конечный результат)
+//Изменяет непосредственно большой десятичный массив
+void s21_banking_round_for_mult(int big_ten_array[], int remainder) {
+    int one[90] = {0};
+    one[0] = 1;
+    if ((remainder > 5) || (remainder == 5 && big_ten_array[0] % 2 == 1)) s21_sum_of_ten_array_for_big_decimal(big_ten_array, one);
 }
 
 //результат хранится в value_1;
@@ -144,6 +180,22 @@ void s21_from_big_decimal_to_ten_array(s21_big_decimal value, int result[]) {
         }
         s21_sum_of_ten_array_for_big_decimal (add, add);
     }
+}
+
+//Сравнивает два десятичных массива, если первое больше, то возвращае т 1, если второе больше - -1, если равны - 0
+int s21_compare_big_ten_array (int array_1[], int array_2[]) {
+    int res = 0;
+    for (int i = 89; i >= 0; i--) {
+        if (array_1[i] > array_2[i]) {
+            res = 1;
+            break;
+        }
+        else if (array_2[i] > array_1[i]) {
+            res = -1;
+            break;
+        }
+    }
+    return res;
 }
 
 void s21_sum_of_ten_array_for_big_decimal (int value_1[], int value_2[]) {

@@ -15,11 +15,11 @@ void run_testcase(Suite *testcase) {
 }
 
 void run_tests(void) {
-  Suite *list_cases[] = {suite_add(),
-                         suite_sub(),
+  Suite *list_cases[] = {//suite_add(),
+                         //suite_sub(),
                          //suite_div(),
                          //suite_mod(),
-                         //suite_mul(),
+                         suite_mul(),
                          //suite_from_decimal_to_float(),
                          //suite_from_decimal_to_int(),
                          //suite_from_float_to_decimal(),
