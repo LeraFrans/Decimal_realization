@@ -73,14 +73,14 @@ int s21_set_exp(s21_decimal value, s21_decimal *result, int exp) {  // 0 - OK, 1
  *  @param value the decimal
  *  @return The scale of decimal
  */
-/*
+
 int s21_get_exp(s21_decimal value) {
     value.bits[3] = value.bits[3] << 1;
     value.bits[3] = value.bits[3] >> 17;
     
     return value.bits[3];
 }
-*/
+
 
 /** @brief Invert bit on current position in decimal
  *

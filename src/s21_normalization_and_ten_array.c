@@ -129,6 +129,20 @@ void s21_from_ten_array_to_decimal(int array[], s21_decimal *result) {
 int s21_get_exp(s21_decimal value) {
     return (value.bits[3] << 1)>>17;
 }
+/*
+void s21_print_decimal(s21_decimal value) {
+    for (int i = 127; i >= 0; i--) {
+        if((i + 1) % 32 == 0) printf("|\n");
+        printf("%d ", s21_get_bit(value, i));
+    }
+    printf("\n");
+    
+}
+*/
+
+// int s21_get_exp(s21_decimal value) {
+//     return (value.bits[3] << 1)>>17;
+// }
 
 //Сравнивает два десятичных массива, если первое больше, то возвращае т 1, если второе больше - -1, если равны - 0
 int s21_compare_ten_array (int array_1[], int array_2[]) {
