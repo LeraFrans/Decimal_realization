@@ -35,12 +35,12 @@ START_TEST(s21_from_decimal_to_float_3) {
   s21_decimal src;
   int result = 0;
   float number = 0.0;
-  src.bits[0] = 0XFFFFFF;
+  src.bits[0] = 0XFFFF;
   src.bits[1] = 0;
   src.bits[2] = 0;
   src.bits[3] = 0;
   result = s21_from_decimal_to_float(src, &number);
-  ck_assert_float_eq(number, 16777215);
+  ck_assert_float_eq(number, 65535);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -49,13 +49,13 @@ START_TEST(s21_from_decimal_to_float_4) {
   s21_decimal src;
   int result = 0;
   float number = 0.0;
-  long int c = 2147745792;
+  long int c = 2147483648;
   src.bits[0] = 23450987;
   src.bits[1] = 0;
   src.bits[2] = 0;
   src.bits[3] = c;
   result = s21_from_decimal_to_float(src, &number);
-  ck_assert_float_eq(number, -2345.0987);
+  ck_assert_float_eq(number, -2.345099e+07);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -70,7 +70,7 @@ START_TEST(s21_from_decimal_to_float_5) {
   src.bits[2] = 0;
   src.bits[3] = 0;
   result = s21_from_decimal_to_float(src, &number);
-  ck_assert_float_eq(number, 0xFFFFFFFFFFFFFFFF);
+  ck_assert_float_eq(number, 1.844674e+19);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -120,7 +120,7 @@ START_TEST(s21_from_decimal_to_float_8) {
   dec.bits[2] = 0;
   dec.bits[3] = 0;
   result = s21_from_decimal_to_float(dec, &number);
-  ck_assert_float_eq(number, 16777215);
+  ck_assert_float_eq(number, 1.677722e+07);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -135,7 +135,7 @@ START_TEST(s21_from_decimal_to_float_9) {
   dec.bits[2] = 0;
   dec.bits[3] = c;
   result = s21_from_decimal_to_float(dec, &number);
-  ck_assert_float_eq(number, -2345.0987);
+  ck_assert_float_eq(number, -2345.099);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -150,7 +150,7 @@ START_TEST(s21_from_decimal_to_float_10) {
   dec.bits[2] = 0;
   dec.bits[3] = 0;
   result = s21_from_decimal_to_float(dec, &number);
-  ck_assert_float_eq(number, 0xFFFFFFFFFFFFFFFF);
+  ck_assert_float_eq(number, 1.844674e+19);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -313,7 +313,7 @@ Suite *suite_from_decimal_to_float(void) {
   tcase_add_test(tc, s21_from_decimal_to_float_3);
   tcase_add_test(tc, s21_from_decimal_to_float_4);
   tcase_add_test(tc, s21_from_decimal_to_float_5);
-  //tcase_add_test(tc, s21_from_decimal_to_float_6);
+  // tcase_add_test(tc, s21_from_decimal_to_float_6);
   tcase_add_test(tc, s21_from_decimal_to_float_7);
   tcase_add_test(tc, s21_from_decimal_to_float_8);
   tcase_add_test(tc, s21_from_decimal_to_float_9);

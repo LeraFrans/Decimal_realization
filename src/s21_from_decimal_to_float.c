@@ -1,24 +1,28 @@
 #include "s21_decimal.h"
 
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
-    int res = 1;
-    if(dst != NULL && src.bits[1] == 0 && src.bits[2] == 0)
-    {
-        int temp = 0;
-        s21_from_decimal_to_int(src, &temp);
-        int exp = s21_get_exp(src);
-        char str[12] = {0};
-        sprintf(str, "%d", temp);
-        int exposition = strlen(str) - exp;
-        for (int i = strlen(str); i >= exposition; i-- ) {
-           str[i] = str[i-1];
-           if (i == exposition) str[i] = '.'; 
-        }
-        *dst = temp * pow(0.1, exp);
-        //printf("exp = %d\n", exp);
-        //printf("dest = %f\n", *dst);
-        res = 0;
-    }
+  int res = 1;
 
-    return res;
+  int error = 0;
+  error = s21_is_owerflow_decimal(src);
+  if (error != 0) return 1;
+  error = s21_check_exponenta(src, src);
+  if (error != 0) return 1;
+
+  double temp = 0;
+  char temp_s[100] = {0};
+  float temp_f = 0;
+  if (dst != NULL) {
+    for (int i = 0; i < 96; i++) {
+      temp += (s21_get_bit(src, i)) * (pow(2, i));
+    }
+    sprintf(temp_s, "%+e", temp);
+    sscanf(temp_s, "%e", &temp_f);
+    *dst = temp_f / pow(10, s21_get_exp(src));
+    if (s21_get_bit(src, 127) == 1) *dst *= -1;
+    res = 0;
+  } else
+    res = 1;
+
+  return res;
 }
